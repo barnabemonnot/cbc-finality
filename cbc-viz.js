@@ -55,8 +55,30 @@ function sketch() {
 	    .attr("stroke-width", "1px")
 	    .text((d) => d.estimate);
 
-	
+	let lines = messagesEnter.selectAll('line')
+	    .data((d)=> d.justification)
 
- 
+	let linesEnter = lines.enter()
+	    .append('line')
+	    .attr("x1", function(d) {
+		let parentData = d3.select(this.parentNode).datum();
+		return marginLeft + parentData.sender * validatorSpacing;
+	    })
+	    .attr("x2", function(d) {
+		//wrong and temporary -- correct this
+		let parentData = d3.select(this.parentNode).datum();
+		return marginLeft + parentData.sender * validatorSpacing + 10;
+	    })
+	    .attr("y1", function(d) {
+		let parentData = d3.select(this.parentNode).datum();
+		return marginTop + parentData.idx * messageSpacing
+	    })
+	    .attr("y2", function(d) {
+		//wrong and temporary -- correct this
+		let parentData = d3.select(this.parentNode).datum();
+		return marginTop + parentData.idx * messageSpacing + 10;
+	    })
+	    .attr("stroke", "black")
+
     })
 }
