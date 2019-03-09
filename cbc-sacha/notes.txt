@@ -24,11 +24,14 @@ Casper CBC and Casper FFG are *both* "overlays" that need to be applied on top o
 
 
 https://twitter.com/VitalikButerin/status/1029907143506374656
-The main tradeoff between FFG and CBC is that CBC seems to have nicer theoretical properties, but FFG seems to be easier to implement.
-
+According to Vitalik: The main tradeoff between FFG and CBC is that CBC seems to have nicer theoretical properties, but FFG seems to be easier to implement.
 
 
 It is an unsolved problem
+
+
+
+
 
 
 Here is my solution
