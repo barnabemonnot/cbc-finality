@@ -1,0 +1,56 @@
+*Here is the problem*
+
+In blockchains we care about adding some notion of “finality” - the idea that some block can be so firmly established in the chain that it cannot be overtaken by a competing block unless a very large portion (eg. 1/4) of validators commit a uniquely attributable fault - act in some way which is clearly and cryptographically verifiably malicious.
+
+OR
+
+In blockchains we care about adding some notion of "finality":
+
+We want validators to sign on blocks in such a way that once a block is "finalized", no conflicting block can be finalized without a large portion of validators having to sign messages that conflict with their earlier messages in a way that the blockchain can detect, and hence penalize.
+
+
+
+Here's why it's interesting
+
+https://twitter.com/VitalikButerin/status/1029903648728408064
+Finality is a very significant advancement: once a block is finalized, it is secure regardless of network latency (unlike confirmations in PoW), and reverting the block requires >= 1/3 of validators to cheat in a way that's detectable and can be used to destroy their deposits
+
+There are many different approaches to finality, but the two important ones within the ethereum ecosystem are Casper FFG and Casper CBC.
+
+According to Vitalik
+
+https://twitter.com/VitalikButerin/status/1029903839669837824
+Casper CBC and Casper FFG are *both* "overlays" that need to be applied on top of some existing fork choice rule, though the abstractions work in different ways.
+
+
+https://twitter.com/VitalikButerin/status/1029907143506374656
+The main tradeoff between FFG and CBC is that CBC seems to have nicer theoretical properties, but FFG seems to be easier to implement.
+
+
+
+It is an unsolved problem
+
+
+Here is my solution
+My solution works.
+
+
+
+
+
+FFG vs CBC
+
++ CBC
+1) Under CBC, the short-term chain selection algorithm, and the “finality algorithm”, are not two awkwardly glued together distinct components, as they admittedly are in Casper FFG; rather, they are both part of the same coherent whole.
+
+2) Second, because safety detection is client-side, there is no need to choose any thresholds in-protocol; clients can decide for themselves what level of safety is sufficient to consider a block as finalized.
+
++FFG
+
+1)Under CBC, although validity and slashing conditions are relatively easy to describe, implementing them requires checking hash chains and executing fork choice rules in-consensus so it is not nearly as simple as taking two messages and checking a couple of inequalities between the numbers that these messages commit to, as you can do in Casper FFG for the NO_SURROUND and NO_DBL_VOTE slashing conditions.
+
+
+Aside: Liveness in CBC Casper piggybacks off of the liveness of whatever the underlying chain algorithm is (eg. if it’s one-block-per-slot, then it depends on a synchrony assumption that all nodes will see everything produced in slot N before the start of slot N+1). It’s not possible to get “stuck” in such a way that one cannot make progress; it’s possible to get to the point of finalizing new blocks from any situation, even one where there are attackers and/or network latency is higher than that required by the underlying chain algorithm.
+
+
+Conclusion: Implementation-wise, CBC may arguably be considerably more complex than FFG, but in terms of ability to reason about the protocol, and the properties that it provides, it’s surprisingly simple.

@@ -1,0 +1,33 @@
+html {
+    font-family: 'Gill Sans';
+    text-align: center;
+}
+
+.scroll-container {
+    width: 500px;
+    margin: 0 auto;
+}
+
+#scroll-sections .epoch {
+    background: yellow;
+    height: 2rem;
+    position: relative;
+    padding: 10px;
+    margin-bottom: 420px;
+    text-align: center;
+    width: 450px;
+}
+
+#graph{
+    margin-left: 0px;
+    width: 470px;
+    position: -webkit-sticky;
+    position: sticky;
+    top: 0px;
+    float: left;
+    z-index: -1;
+}
+
+svg {
+    background: #eee;
+}
