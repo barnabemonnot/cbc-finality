@@ -1,13 +1,39 @@
 <html>
   <head>
-    <meta charset="utf-8">    
+    <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="general.css"/>
     <link rel="stylesheet" type="text/css" href="index.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+    <script src="libs/katex/katex.min.js"></script>
+    <script src="libs/underscore.min.js"></script>
+    <script src="libs/react.development.js"></script>
+    <script src="libs/react-dom.development.js"></script>
     <script src="libs/d3v4+jetpack.js"></script>
     <script src="libs/graph-scroll.js"></script>
     <script src="hack.js"></script>
+    <script src="src/component-library.js"></script>
   </head>
   <body>
+    <div class="document-container">
+      <div class="title-container">
+        <div class="title">
+          Finality in CBC Casper
+        </div>
+        <div class="sub-title">
+      	  Checking for finality in a set of messages.
+      	</div>
+      </div>
+
+      <section class="abstract">
+        On to the finals!!!
+      </section>
+
+      <div id="toc-author-block" style="display: flex">
+        <div id="authors"></div>
+        <div id="toc"></div>
+      </div>
+    </div>
     <div>
       <div class="introduction">
 	<div>
@@ -29,17 +55,17 @@
 	  <p>
 	    But before we do that, let's take a look at why finality is not trivial to detect.
 	  </p>
-	  
+
 	</div>
-	
-	
+
+
       </div>
 
       <div class="scroll-container">
 	<div id="graph">
 	  <svg id="intro-svg" viewBox="0 0 400 300"></svg>
 	</div>
-	
+
 	<div id="scroll-sections">
 
 	  <div class="epoch">
@@ -67,11 +93,27 @@
 
 	  <div class="epoch">
 	  </div>
-	  
+
 	</div>
-      </div>      
+      </div>
     </div>
-    
-    
+
+    <script>
+    let authorData = [{
+      name: "Aditya Asgaonkar",
+      affiliation: "Ethereum Foundation"
+    }, {
+        name: "Barnabé Monnot",
+        affiliation: "hackingresear.ch"
+      }, {
+        name: "Sacha Yves Saint-Léger",
+        affiliation: "hackingresear.ch"
+      }]
+      </script>
+      <script src="src/authorFormatting.js"></script>
+      <script src="src/sectionFormatting.js"></script>
+      <script src="src/referencesFormatting.js"></script>
+      <script src="src/figureFormatting.js"></script>
+      <script src="src/mathFormatting.js"></script>
   </body>
 </html>
