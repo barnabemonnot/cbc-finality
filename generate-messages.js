@@ -1,7 +1,11 @@
 const fs = require("fs");
+const _ = require("underscore");
 
-const num_validators = 5;
-const num_messages = 100;
+const num_validators = 12;
+const num_normal_messages = 150;
+const num_active_messages = 70;
+
+const active_validator_set = [3, 4, 5, 6, 7, 8, 9];
 
 function randomInteger(range) {
   // Returns random integer in [0,range)
@@ -27,9 +31,13 @@ const latestMessages = function(messages) {
   // -1 if x is equivocating or no message
   // assumes a validator always includes its latest previous message in a new message
   // O(m)
-  return [...Array(num_validators).keys()].map(
-    v => latestMessage(messages, v)
-  );
+  var highestMessage = new Array(num_validators).fill(-1);
+  for (var i = 0; i < messages.length; i++) {
+    if (highestMessage[messages[i].sender] == -1 || messages[i].justification.includes(highestMessage[messages[i].sender])) {
+      highestMessage[messages[i].sender] = i;
+    }
+  }
+  return highestMessage;
 }
 
 const previousMessage = function(messages, message_id) {
@@ -94,16 +102,24 @@ const constructMessage = function(messages, m_sender, m_justification) {
 }
 
 // m = all_messages[4];
-// console.log(retrieveMessages(all_messages, m.justification))
+// console.log(retrieveMessages(all_messages, m.justification));
 // console.log(m.justification);
 // console.log(getEstimate(all_messages, m.justification));
 
 all_messages = [];
-for (var round=0; round < num_messages; round++) {
-  message_producer = randomInteger(num_validators);
+var num_total_messages = num_normal_messages+num_active_messages;
+var num_active_messages_produced = 0;
+for (var round=0; round<num_total_messages; round++) {
+  if(num_active_messages_produced<num_active_messages && randomInteger(num_total_messages)>num_active_messages) {
+    message_producer = _.sample(active_validator_set);
+    num_active_messages_produced++;
+  }
+  else {
+    message_producer = randomInteger(num_validators);
+  }
   new_msg = constructMessage(all_messages, message_producer, latestMessages(all_messages).filter(msg_id => msg_id!=-1));
   all_messages.push(new_msg);
 }
 var json = JSON.stringify(all_messages);
-fs.writeFileSync('data/4val100msg.json', json, 'utf8');
+fs.writeFileSync('data/12val220msg.json', json, 'utf8');
 console.log(all_messages);
