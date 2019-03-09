@@ -35,7 +35,9 @@
       </div>
     </div>
     <div>
-      <div class="introduction">
+
+      <section class="introduction">
+
 	<div>
 	  <h2>Here is the problem</h2>
 	  In blockchains we care about adding some notion of “finality” - the idea that some block can be so firmly established in the chain that it cannot be overtaken by a competing block unless a very large portion (eg. 1/4) of validators commit a uniquely attributable fault - act in some way which is clearly and cryptographically verifiably malicious.
@@ -55,21 +57,19 @@
 	  <p>
 	    But before we do that, let's take a look at why finality is not trivial to detect.
 	  </p>
-
 	</div>
 
-
-      </div>
-
+      </section>
+  
       <div class="scroll-container">
+
 	<div id="graph">
 	  <svg id="intro-svg" viewBox="0 0 400 300"></svg>
 	</div>
 
 	<div id="scroll-sections">
-
 	  <div class="epoch">
-	    Binary consensus. A naive (and incorrect) finality oracle: A value is finalized if all nodes propose that same value in their latest messages.
+	    Imagine we have three nodes -- A, B and C -- executing a simple binary consensus protocol -- in other words sending messages containing either 0 or 1. And imagine we are using the following intuitive (but alas incorrect) finality oracle: a value is finalized if all nodes propose that same value in their latest messages.
 	  </div>
 
 	  <div class="epoch">
@@ -87,6 +87,11 @@
 	  <div class="epoch">
 	  </div>
 
+	  <div class="epoch">
+	  </div>
+
+	  <div class="epoch">
+	  </div>
 
 	  <div class="epoch">
 	  </div>
