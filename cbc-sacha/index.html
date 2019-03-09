@@ -1,4 +1,5 @@
-<html>
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -101,6 +102,56 @@
 
 	</div>
       </div>
+    </div>
+
+    <div class="document-container">
+      <div class="section-title section-label">
+        The finality test
+      </div>
+
+      <div class="section-sub-title section-label">
+        A simple test
+      </div>
+
+      <div class="content">
+        The introduction presented a situation where validators cannot agree while all are honest and a majority exists. We then require the following property: for all validators to agree on a value, and acknowledge that they have seen everyone agree with that value. In the following, we present a test to detect the presence of a <strong>quorum</strong> of validators satisfying this property.
+      </div>
+
+      <div class="content">
+        Let us introduce the objects in our discussion. Validators send messages <span class="math">m</span>, with the general pattern of a message given by <span class="math">m = (c, v, \sigma)</span>, with:
+      	  <ul>
+            <li><strong>The estimate</strong> <span class="math">c</span>: a consensus value among all possible values <span class="math">\mathcal{C}</span>. In this article, we consider only binary consensus, where <span class="math">\mathcal{C} = \{ 0, 1 \}.</span></li>
+      	    <li><strong>The sender</strong> <span class="math">v</span>: a reference to a validator from the set <span class="math">\mathcal{V}</span>.</li>
+      	    <li><strong>The justification</strong> <span class="math">\sigma</span>: a reference to some protocol state <span class="math">\sigma</span>, i.e., a set of messages that the validator acknowledges.</li>
+      </div>
+
+      <div class="content">
+        We would be happy to find, for an integer <span class="math">q</span>, a set of validators where each validator from that set
+        <ol>
+          <li>Estimates the same consensus value <span class="math">c</span>.</li>
+          <li>Has acknowledged that (i.e., included in its justification) at least <span class="math">q</span> other validators from that set has estimated <span class="math">c</span>.</li>
+          <li>These included validators have kept on estimating the value<span class="math">c</span>.</li>
+        </ol>
+      </div>
+
+      <div class="content">
+        Suppose we have the following bipartite graph, where we trace an edge between two validators <span class="math">A</span> and <span class="math">B</span> if <span class="math">A</span> has included a message from <span class="math">B</span> in its latest justification where <span class="math">B</span> estimates the same value as <span class="math">A</span>.
+      </div>
+
+      <div id="img-four-validators"></div>
+      	<script>
+      	ReactDOM.render(
+      	  React.createElement(
+      	    StaticImage, {
+      	      src: 'img/simpletest.png',
+      	      name: 'The acknowledgement graph of 4 validators.'
+      	    },
+            "In this graph, a validator ",
+            e("span", { className: "math" }, "x"),
+            " on the left connects to a validator y on the right if x has acknowledged in its latest justification a message from y which estimates the same value as x's."
+      	  ), document.querySelector('#img-four-validators')
+      	);
+      	</script>
     </div>
 
     <script>
