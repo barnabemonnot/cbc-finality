@@ -123,6 +123,53 @@ const levelKMessages = [{
   idx: 6
 }];
 
+const threeValidatorsK = [{
+  sender: 0,
+  estimate: 0,
+  justification: [],
+  idx: 0
+}, {
+  sender: 0,
+  estimate: 0,
+  justification: [0],
+  idx: 1
+}, {
+  sender: 0,
+  estimate: 0,
+  justification: [0, 1, 3, 4, 6],
+  idx: 2
+}, {
+  sender: 1,
+  estimate: 0,
+  justification: [],
+  idx: 3
+}, {
+  sender: 1,
+  estimate: 0,
+  justification: [3, 6],
+  idx: 4
+}, {
+  sender: 1,
+  estimate: 0,
+  justification: [0, 1, 3, 4, 6],
+  idx: 5
+}, {
+  sender: 2,
+  estimate: 0,
+  justification: [],
+  idx: 6
+}, {
+  sender: 2,
+  estimate: 0,
+  justification: [3, 6],
+  idx: 7
+}, {
+  sender: 2,
+  estimate: 0,
+  justification: [3, 6, 7],
+  idx: 8
+}];
+
 const latestMessage = function(messages, validator) {
   // Returns index of latest message from @validator in @messages
   // -1 if x is equivocating or no message
@@ -184,12 +231,14 @@ const pruneMessages = function(messages, prunedValidators) {
 }
 
 const removeEquivocatingValidators = function(messages) {
+  // Remove equivocating messages and prune validators who equivocated
   const equivocatingMsgs = getEquivocatingMessages(messages);
   const equivocatingValidators = _.uniq(equivocatingMsgs.map(m => m.sender));
   return pruneMessages(messages, equivocatingValidators);
 }
 
 const outputLobbyingGraph = function(messages, validators, consensus) {
+  // Lobbying graph for simple detector
   const latestMessages = validators.map(v => latestMessage(messages, v)); // O(nm)
   const pairs = validators.reduce(
     (acc, x) => acc.concat(validators.map(
@@ -307,6 +356,8 @@ function levelk(messages, consensus, k, q) {
 }
 
 const pruneLevelK = function(messages, validators, consensus, k, q) {
+  // We do the pruning by iterating over validators and pruning until either all
+  // left satisfy the k-level property or none are left
   console.log(messages);
   var prunedValidators = [];
   var prunedMessageIndices = [];
@@ -336,9 +387,8 @@ const pruneLevelK = function(messages, validators, consensus, k, q) {
     }
 
     // Compute the k-level property for remaining messages
-    const kPrunedMessages = levelk(
-      prunedMessages, consensus, k, q
-    );
+    const kPrunedMessages = levelk(prunedMessages, consensus, k, q);
+    console.log("kPruned", kPrunedMessages);
     for (var i = 0; i < validators.length; i++) { // O(n)
       const v = validators[i];
 
@@ -373,3 +423,5 @@ console.log(pruneLevelK(levelKMessages.concat(
   [{ sender: 1, estimate: 0, justification: [0, 1, 2, 3, 4, 5], idx: 7 }]
 ), [0, 1], 0, 2, 2));
 console.log(removeEquivocatingValidators(equivocatingMessages));
+console.log("//////");
+console.log(pruneLevelK(threeValidatorsK, [0, 1, 2], 0, 2, 2));
