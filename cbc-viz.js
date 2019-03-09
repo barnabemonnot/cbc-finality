@@ -11,7 +11,7 @@ function sketch() {
     let numSenders = 4;
 
     let g = svg.append('g');
-    let circleColor = "lightblue";
+    let circleColor = "rgba(255,56,0,0.7)";
     let validatorSpacing = 80;
     let messageSpacing = 60;
     let marginLeft = 40;
@@ -20,6 +20,8 @@ function sketch() {
     d3.json("data/4val100msg.json", (data) => {
 	console.log(data);
 
+	let t = d3.transition().duration(250);
+	
 	// DATA JOIN
 	// Join new data with old elements, if any.
 	let messages = g.selectAll("g.message")
@@ -36,7 +38,12 @@ function sketch() {
 	    .attr("fill", circleColor)
 	    .attr("cx", (d) => marginLeft + (d.sender * validatorSpacing))
 	    .attr("cy", (d) => marginTop + (d.idx * messageSpacing))
-	    .attr("r", 12);
+	    .attr("r", 12)
+	    .attr("opacity", 0)
+	    .transition(t)
+	    .delay((d) => d.idx * 200)
+	    .duration(200)
+	    .attr("opacity", 1);
 
 	messagesEnter.append('text')
 	    .attr("x", function(d,i) {return marginLeft + d.sender * validatorSpacing})
@@ -47,6 +54,8 @@ function sketch() {
 	    .attr("fill", "white")
 	    .attr("stroke-width", "1px")
 	    .text((d) => d.estimate);
+
+	
 
  
     })
