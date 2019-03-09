@@ -41,20 +41,20 @@
 
 	<div>
 	  <h2>Here is the problem</h2>
-	  In blockchains we care about adding some notion of “finality” - the idea that some block can be so firmly established in the chain that it cannot be overtaken by a competing block unless a very large portion (eg. 1/4) of validators commit a uniquely attributable fault - act in some way which is clearly and cryptographically verifiably malicious.
+	  In blockchains we care about adding some notion of “finality” - the idea that some block can be so firmly established in the chain that it cannot be forked out by a competing block unless a very large portion (eg. 1/4) of validators commit a uniquely attributable fault - act in some way which is verifiably malicious.
 	</div>
 
 	<div>
 	  <h2>Here's why it's interesting</h2>
-	  Finality is a very significant advancement: once a block is finalized, it is secure regardless of network latency (unlike confirmations in PoW), and reverting the block requires >= x% of validators to cheat in a way that's detectable and can be used to destroy their deposits.
+	  Finality is a condition in which we are asynchronously safe on a decision: once a decision is finalized, no conflicting decision will be proposed (by validators from some majority subset) regardless of network latency (unlike confirmations in PoW), and proposing a confliciting decision requires >= x% of validators to cheat in a way that's detectable and can be used to destroy their deposits.
 	  <p>
-	    There are many different approaches to finality, but the two important ones within the ethereum ecosystem are Casper FFG and Casper CBC. Here we'll be focusing on CBC
+	    There are many different approaches to consensus and finality, but the two important ones within the Ethereum ecosystem are Casper FFG and Casper CBC. Here we'll be focusing on Casper CBC.
 	  </p>
 	</div>
 
 	<div>
 	  <h2>What exactly are we focusing on?</h2>
-	  Specifically, we'll be implementing a finality oracle -- a set of heuristics that allow us to detect some of the cases where a block is final under CBC Casper.
+	  Specifically, we'll be implementing a finality oracle -- a set of conditions that allow us to detect some of the cases where a decision is final under CBC Casper.
 	  <p>
 	    But before we do that, let's take a look at why finality is not trivial to detect.
 	  </p>
@@ -180,6 +180,7 @@
       </div>
 
       <div class="content">
+<<<<<<< Updated upstream
         Equivocation complicates finality seriously, since nodes who acknowledge one message from the malicious validator may be final on a value different from nodes who acknowledged the opposite value from the equivocating message. Before building the acknowledgement graph above, validators who equivocated are removed from the messages log.
       </div>
 
@@ -272,6 +273,9 @@
 
       <div class="content">
         Suppose in a future state majority changes after the finality test had returned positive. Clearly someone must have changed their mind since with a <span class="math">q</span> above half the number of validators, the test guarantees the finality of the decision for future states. The validator who changed its mind must have equivocated and the fault is attributable by exhibiting equivocating messages. The quorum <span class="math">q</span> and the level <span class="math">k</span> provide bounds on how many validators must have changed their mind to destroy finality.
+=======
+        Equivocation complicates finality seriously, since nodes who acknowledge one message from the malicious validator may be final on a value
+>>>>>>> Stashed changes
       </div>
     </div>
 
