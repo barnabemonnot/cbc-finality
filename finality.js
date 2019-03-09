@@ -130,7 +130,7 @@ const latestMessage = function(messages, validator) {
   var highestMessage = -1;
   for (var i = 0; i < messages.length; i++) {
     if (messages[i].sender == validator &&
-      (highestMessage = -1 || message[i].justification.includes(highestMessage))) {
+      (highestMessage == -1 || message[i].justification.includes(highestMessage))) {
       highestMessage = i;
     }
   }
