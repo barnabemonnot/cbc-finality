@@ -4,8 +4,8 @@ function sketch() {
     let svg = d3.select("#svg");
     let width = "400px";
     let height = "6100px";
-    let vdelay = 400;
-    let vduration = 400;
+    let vdelay = 200;
+    let vduration = 200;
 
     svg.attr("width", width)
 	.attr("height", height);
@@ -75,7 +75,7 @@ function sketch() {
 	    .attr("opacity", 0.4);
 
 	messagesEnter.append('circle')
-	    .attr("fill", circleColor)
+	    .attr("fill", (d) => d3.interpolateRdYlGn(d.klevel/100 * 2))
 	    .attr("cx", (d) => marginLeft + (d.sender * validatorSpacing))
 	    .attr("cy", (d) => marginTop + (d.idx * messageSpacing))
 	    .attr("r", 12)
