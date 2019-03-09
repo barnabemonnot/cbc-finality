@@ -168,7 +168,7 @@
     	</script>
 
       <div class="content">
-        If we set our quorum size to be <span class="math">q = 2</span>, then the finality test in the previous example returns positive. <span class="math">A</span> and <span class="math">B</span> agree, and both acknowledge that they agree. For a quorum size of <span class="math">q = 3</span>, that is not the case and the finality test returns negative.
+        If we set our quorum to be <span class="math">q = 2</span>, then the finality test in the previous example returns positive. <span class="math">A</span> and <span class="math">B</span> agree, and both acknowledge that they agree. For a quorum <span class="math">q = 3</span>, that is not the case and the finality test returns negative.
       </div>
 
       <div class="section-sub-title section-label">
@@ -180,7 +180,98 @@
       </div>
 
       <div class="content">
-        Equivocation complicates finality seriously, since nodes who acknowledge one message from the malicious validator may be final on a value 
+        Equivocation complicates finality seriously, since nodes who acknowledge one message from the malicious validator may be final on a value different from nodes who acknowledged the opposite value from the equivocating message. Before building the acknowledgement graph above, validators who equivocated are removed from the messages log.
+      </div>
+
+      <div class="section-sub-title section-label">
+        A finer test
+      </div>
+
+      <div class="content">
+        The previous test looks for an acknowledgement graph one layer deep, where validators acknowledge a message from other validators that matches their own estimate. One can have a stronger guarantee on finality by requiring more layers to be acknowledged. In the following, we set the quorum at <span class="math">q</span>.
+      </div>
+
+      <div class="content">
+        A message <span class="math">m</span> is at <strong>level 0</strong> on consensus value <span class="math">c</span> if it estimates <span class="math">c</span> and all later messages from the same sender also estimate <span class="math">c</span>.
+      </div>
+
+      <div class="content">
+        A message <span class="math">m</span> is at <strong>level <span class="math">k+1</span></strong> on consensus value <span class="math">c</span> if
+        <ul>
+          <li>It is at level 0 on <span class="math">c</span>,</li>
+          <li>At least <span class="math">q</span> messages in the justification of <span class="math">m</span> are at level <span class="math">k</span> on <span class="math">c</span>.</li>
+        </ul>
+      </div>
+
+      <div id="img-levelk"></div>
+    	<script>
+    	ReactDOM.render(
+    	  React.createElement(
+    	    StaticImage, {
+    	      src: 'img/levelk.png',
+    	      name: 'An acknowledgement graph of 3 validators.'
+    	    },
+          "A, B and C send messages, all estimating 0, represented as circles. Edges show a source message has acknowledged a target message (at the end of the arrow). We will compute step-by-step the level of each message on value 0, for a quorum ",
+          e("span", { className: "math" }, "q = 2"),
+          "."
+    	  ), document.querySelector('#img-levelk')
+    	);
+    	</script>
+
+      <div id="img-levelk0"></div>
+    	<script>
+    	ReactDOM.render(
+    	  React.createElement(
+    	    StaticImage, {
+    	      src: 'img/levelk0.png',
+    	      name: 'Level 0 messages.'
+    	    },
+          "All messages are level 0 on value 0, since all future messages (or none of them if there is no future message) also estimates 0."
+    	  ), document.querySelector('#img-levelk0')
+    	);
+    	</script>
+
+      <div id="img-levelk1"></div>
+    	<script>
+    	ReactDOM.render(
+    	  React.createElement(
+    	    StaticImage, {
+    	      src: 'img/levelk1.png',
+    	      name: 'Level 1 messages.'
+    	    },
+          "Messages acknowledging at least two level 0 messages are level 1 at consensus value 0."
+    	  ), document.querySelector('#img-levelk1')
+    	);
+    	</script>
+
+      <div id="img-levelk2"></div>
+    	<script>
+    	ReactDOM.render(
+    	  React.createElement(
+    	    StaticImage, {
+    	      src: 'img/levelk2.png',
+    	      name: 'Level 2 messages.'
+    	    },
+          "Messages acknowledging at least two level 1 messages are level 2 at consensus value 0."
+    	  ), document.querySelector('#img-levelk2')
+    	);
+    	</script>
+
+      <div class="content">
+        Finally, a set <span class="math">S</span> of validators is <span class="math">(q, k)</span>-good on <span class="math">c</span> if there is a level <span class="math">k</span> message for each validator, where the levels are computed on validators from this set <span class="math">S</span> <em>only</em>.
+        This means that the <span class="math">q</span> messages at each level must come only from validators in <span class="math">S</span>.
+      </div>
+
+      <div class="section-sub-title section-label">
+        Setting the quorum
+      </div>
+
+      <div class="content">
+        We left unresolved the question of how to set the quorum and will not expand much here. Of course, the quorum makes the requirement for the finality test to return positive more or less stringent. Setting <span class="math">q</span> above half the number of validators guarantees safety in the following way.
+      </div>
+
+      <div class="content">
+        Suppose in a future state majority changes after the finality test had returned positive. Clearly someone must have changed their mind since with a <span class="math">q</span> above half the number of validators, the test guarantees the finality of the decision for future states. The validator who changed its mind must have equivocated and the fault is attributable by exhibiting equivocating messages. The quorum <span class="math">q</span> and the level <span class="math">k</span> provide bounds on how many validators must have changed their mind to destroy finality.
       </div>
     </div>
 
@@ -189,17 +280,17 @@
       name: "Aditya Asgaonkar",
       affiliation: "Ethereum Foundation"
     }, {
-        name: "Barnabé Monnot",
-        affiliation: "hackingresear.ch"
-      }, {
-        name: "Sacha Yves Saint-Léger",
-        affiliation: "hackingresear.ch"
-      }]
-      </script>
-      <script src="src/authorFormatting.js"></script>
-      <script src="src/sectionFormatting.js"></script>
-      <script src="src/referencesFormatting.js"></script>
-      <script src="src/figureFormatting.js"></script>
-      <script src="src/mathFormatting.js"></script>
+      name: "Barnabé Monnot",
+      affiliation: "hackingresear.ch"
+    }, {
+      name: "Sacha Yves Saint-Léger",
+      affiliation: "hackingresear.ch"
+    }]
+    </script>
+    <script src="src/authorFormatting.js"></script>
+    <script src="src/sectionFormatting.js"></script>
+    <script src="src/referencesFormatting.js"></script>
+    <script src="src/figureFormatting.js"></script>
+    <script src="src/mathFormatting.js"></script>
   </body>
 </html>

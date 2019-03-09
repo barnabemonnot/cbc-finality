@@ -410,6 +410,24 @@ const pruneLevelK = function(messages, validators, consensus, k, q) {
   return validators.filter(v => !prunedValidators.includes(v));
 }
 
+function tagLevel(taggedMessages, kbound) {
+  return taggedMessages.map(
+    m => {
+      var klevel = -1;
+      for (var i = 0; i < kbound; i++) {
+        if (m["level"+i]) klevel = i;
+      }
+      return {
+        sender: m.sender,
+        estimate: m.estimate,
+        justification: m.justification.slice(),
+        idx: m.idx,
+        klevel: klevel
+      }
+    }
+  )
+}
+
 // const validators = [0, 1, 2, 3];
 // console.log(edges(fourValidatorsMessages));
 // const lobbyingGraph = outputLobbyingGraph(fourValidatorsMessages, validators, 1);
@@ -427,7 +445,11 @@ const pruneLevelK = function(messages, validators, consensus, k, q) {
 // console.log("//////");
 // console.log(pruneLevelK(threeValidatorsK, [0, 1, 2], 0, 2, 2));
 
-fs.readFile('data/4val100msg.json', 'utf8', (err, data) => {
+const filename = 'data/4val100msg.json';
+fs.readFile(filename, 'utf8', (err, data) => {
   const messages = JSON.parse(data);
-  console.log(pruneLevelK(messages, [0, 1, 2, 3], 0, 3, 4));
+  const taggedMessages = levelk(messages, 0, messages.length, 4);
+  console.log(taggedMessages);
+  const reTaggedMessages = tagLevel(taggedMessages, messages.length);
+  fs.writeFileSync(filename, JSON.stringify(reTaggedMessages), 'utf8');
 });
