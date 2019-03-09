@@ -98,17 +98,17 @@ const outputLobbyingGraph = function(messages, validators, consensus) {
       (
         messages[latestMessages[d[0]]].justification.map(
           msgidx => messages[msgidx]
-        ).some(
+        ).some( // O(m^2) = O(m) * O(m)
           message => (
             message.sender == d[1] &&
-            laterMessages(messages, message.idx, d[1]).every(
+            laterMessages(messages, message.idx, d[1]).every( // O(m)
               laterMessage => laterMessage.estimate == consensus
             )
           )
         )
       )
     )
-  ); // O(n^2)
+  ); // O(n^2 . m^2)
 }
 
 const pruneLobbyingGraph = function(lobbyingGraph, validators, q) {
@@ -135,7 +135,64 @@ const pruneLobbyingGraph = function(lobbyingGraph, validators, q) {
   return validators.filter(v => !pruned.includes(v));
 }
 
+function isFutureOf(m1, m2, messages) {
+  if (m1.justification.includes(m2.idx)) return true;
+  else return m1.justification.some(
+    m3idx => isFutureOf(messages[m3idx], m2, messages)
+  );
+}
+
+function connectToMessages(message, messages) {
+  return messages.filter(
+    m1 => (
+      message.justification.includes(m1.idx) &&
+      !messages.some(
+        m2 => isFutureOf(m2, m1, messages) && message.justification.includes(m2.idx)
+      )
+    )
+  );
+}
+
+function edges(messages) {
+  return messages.reduce(
+    (acc, m1) => {
+      const searchArray = connectToMessages(m1, messages);
+      return acc.concat(
+        searchArray.map(
+          m2 => {
+            return {
+              source: m1.idx,
+              target: m2.idx
+            };
+          }
+        )
+      );
+    },
+    []
+  );
+}
+
+function levelZero(messages, consensus) {
+  return messages.map(
+    message => {
+      return {
+        sender: message.sender,
+        estimate: message.estimate,
+        justification: message.justification,
+        level0: laterMessages(messages, message.idx, message.sender).every(
+          laterMessage => laterMessage.estimate == consensus
+        )
+      };
+    }
+  )
+}
+
+function levelk(messages, consensus, k) {
+  // return messages.
+}
+
 const validators = [0, 1, 2, 3];
+console.log(edges(fourValidatorsMessages));
 const lobbyingGraph = outputLobbyingGraph(fourValidatorsMessages, validators, 1);
 console.log(lobbyingGraph);
 const s = pruneLobbyingGraph(lobbyingGraph, validators, 2);
