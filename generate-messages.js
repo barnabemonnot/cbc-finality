@@ -1,3 +1,5 @@
+const fs = require("fs");
+
 const num_validators = 5;
 const num_messages = 100;
 
@@ -48,18 +50,18 @@ const previousMessage = function(messages, message_id) {
   return -1;
 }
 
-const retreiveMessages = function(messages, list_of_ids) {
-  retreived_messages = [];
+const retrieveMessages = function(messages, list_of_ids) {
+  retrieved_messages = [];
   // console.log(list_of_ids);
   for (var i=0; i<list_of_ids.length; i++) {
-    retreived_messages.push(messages[list_of_ids[i]]);
+    retrieved_messages.push(messages[list_of_ids[i]]);
   }
-  return retreived_messages;
+  return retrieved_messages;
 }
 
 const getEstimate = function(messages, ids_of_justification) {
   var wt_0 = 0, wt_1 = 0;
-  justification = retreiveMessages(messages, ids_of_justification);
+  justification = retrieveMessages(messages, ids_of_justification);
   lastest_messages_in_justification = latestMessages(justification);
   // console.log(lastest_messages_in_justification);
 
@@ -93,15 +95,17 @@ const constructMessage = function(messages, m_sender, m_justification) {
   };
 }
 
-m = all_messages[4];
-// console.log(retreiveMessages(all_messages, m.justification))
-console.log(m.justification);
-console.log(getEstimate(all_messages, m.justification));
+// m = all_messages[4];
+// console.log(retrieveMessages(all_messages, m.justification))
+// console.log(m.justification);
+// console.log(getEstimate(all_messages, m.justification));
 
 all_messages = [];
 for (var round=0; round < num_messages; round++) {
   message_producer = randomInteger(num_validators);
   new_msg = constructMessage(all_messages, message_producer, latestMessages(all_messages).filter(msg_id => msg_id!=-1));
   all_messages.push(new_msg);
-  console.log(new_msg);
 }
+var json = JSON.stringify(all_messages);
+fs.writeFileSync('data/4val100msg.json', json, 'utf8');
+console.log(all_messages);

@@ -1,4 +1,5 @@
 const _ = require("underscore");
+const fs = require("fs");
 
 const introMessages = [{
   sender: 0,
@@ -416,12 +417,17 @@ const pruneLevelK = function(messages, validators, consensus, k, q) {
 // const s = pruneLobbyingGraph(lobbyingGraph, validators, 2);
 // console.log(s);
 
-console.log("//////");
-console.log(pruneLevelK(levelKMessages, [0, 1], 0, 2, 2));
-console.log("//////");
-console.log(pruneLevelK(levelKMessages.concat(
-  [{ sender: 1, estimate: 0, justification: [0, 1, 2, 3, 4, 5], idx: 7 }]
-), [0, 1], 0, 2, 2));
-console.log(removeEquivocatingValidators(equivocatingMessages));
-console.log("//////");
-console.log(pruneLevelK(threeValidatorsK, [0, 1, 2], 0, 2, 2));
+// console.log("//////");
+// console.log(pruneLevelK(levelKMessages, [0, 1], 0, 2, 2));
+// console.log("//////");
+// console.log(pruneLevelK(levelKMessages.concat(
+//   [{ sender: 1, estimate: 0, justification: [0, 1, 2, 3, 4, 5], idx: 7 }]
+// ), [0, 1], 0, 2, 2));
+// console.log(removeEquivocatingValidators(equivocatingMessages));
+// console.log("//////");
+// console.log(pruneLevelK(threeValidatorsK, [0, 1, 2], 0, 2, 2));
+
+fs.readFile('data/4val100msg.json', 'utf8', (err, data) => {
+  const messages = JSON.parse(data);
+  console.log(pruneLevelK(messages, [0, 1, 2, 3], 0, 37, 3));
+});
