@@ -13,7 +13,7 @@ function sketch() {
     let numSenders = 4;
 
     let g = svg.append('g');
-    let circleColor = "rgba(255,56,0,0.7)";
+    let circleColor = "rgba(255,56,0,1.0)";
     let validatorSpacing = 80;
     let messageSpacing = 60;
     let marginLeft = 40;
@@ -37,7 +37,7 @@ function sketch() {
 	    .attr("class", "message");
 
 	let lines = messagesEnter.selectAll('line')
-	    .data((d)=> d.justification)
+	.data((d) => d.justification)
 
 	let linesEnter = lines.enter()
 	    .append('line')
@@ -64,6 +64,7 @@ function sketch() {
 		return marginTop + sender.idx * messageSpacing;
 	    })
 	    .attr("stroke", "black")
+	    .attr("stroke-width", "0.5px")
 	    .attr("opacity", 0)
 	    .transition(t)
 	    .delay(function(d) {
@@ -71,7 +72,7 @@ function sketch() {
 		return parentData.idx  * vdelay
 	    })
 	    .duration(vduration)
-	    .attr("opacity", 1);
+	    .attr("opacity", 0.4);
 
 	messagesEnter.append('circle')
 	    .attr("fill", circleColor)
