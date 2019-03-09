@@ -429,5 +429,5 @@ const pruneLevelK = function(messages, validators, consensus, k, q) {
 
 fs.readFile('data/4val100msg.json', 'utf8', (err, data) => {
   const messages = JSON.parse(data);
-  console.log(pruneLevelK(messages, [0, 1, 2, 3], 0, 37, 3));
+  console.log(pruneLevelK(messages, [0, 1, 2, 3], 0, 3, 4));
 });

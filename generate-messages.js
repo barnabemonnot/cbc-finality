@@ -15,7 +15,7 @@ const latestMessage = function(messages, validator) {
   var highestMessage = -1;
   for (var i = 0; i < messages.length; i++) {
     if (messages[i].sender == validator &&
-      (highestMessage = -1 || message[i].justification.includes(highestMessage))) {
+      (highestMessage == -1 || message[i].justification.includes(highestMessage))) {
       highestMessage = i;
     }
   }
@@ -27,13 +27,9 @@ const latestMessages = function(messages) {
   // -1 if x is equivocating or no message
   // assumes a validator always includes its latest previous message in a new message
   // O(m)
-  var highestMessage = new Array(num_validators).fill(-1);
-  for (var i = 0; i < messages.length; i++) {
-    if (highestMessage[messages[i].sender] == -1 || messages[i].justification.includes(highestMessage[messages[i].sender])) {
-      highestMessage[messages[i].sender] = i;
-    }
-  }
-  return highestMessage;
+  return [...Array(num_validators).keys()].map(
+    v => latestMessage(messages, v)
+  );
 }
 
 const previousMessage = function(messages, message_id) {
@@ -61,7 +57,9 @@ const retrieveMessages = function(messages, list_of_ids) {
 
 const getEstimate = function(messages, ids_of_justification) {
   var wt_0 = 0, wt_1 = 0;
-  justification = retrieveMessages(messages, ids_of_justification);
+  justification = ids_of_justification.map(
+    idx => messages[idx]
+  );
   lastest_messages_in_justification = latestMessages(justification);
   // console.log(lastest_messages_in_justification);
 

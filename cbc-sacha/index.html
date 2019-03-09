@@ -61,7 +61,7 @@
 	</div>
 
       </section>
-  
+
       <div class="scroll-container">
 
 	<div id="graph">
@@ -139,19 +139,49 @@
       </div>
 
       <div id="img-four-validators"></div>
-      	<script>
-      	ReactDOM.render(
-      	  React.createElement(
-      	    StaticImage, {
-      	      src: 'img/simpletest.png',
-      	      name: 'The acknowledgement graph of 4 validators.'
-      	    },
-            "In this graph, a validator ",
-            e("span", { className: "math" }, "x"),
-            " on the left connects to a validator y on the right if x has acknowledged in its latest justification a message from y which estimates the same value as x's."
-      	  ), document.querySelector('#img-four-validators')
-      	);
-      	</script>
+    	<script>
+    	ReactDOM.render(
+    	  React.createElement(
+    	    StaticImage, {
+    	      src: 'img/simpletest.png',
+    	      name: 'The acknowledgement graph of 4 validators.'
+    	    },
+          "In this graph, a validator ",
+          e("span", { className: "math" }, "x"),
+          " on the left connects to a validator ",
+          e("span", { className: "math" }, "y"),
+          " on the right if ",
+          e("span", { className: "math" }, "x"),
+          " has acknowledged in its latest justification a message from ",
+          e("span", { className: "math" }, "y"),
+          " which estimates the same value as ",
+          e("span", { className: "math" }, "x"),
+          "'s. In other words, ",
+          e("span", { className: "math" }, "x"),
+          " and ",
+          e("span", { className: "math" }, "y"),
+          " agree, and ",
+          e("span", { className: "math" }, "x"),
+          " knows they agree. A validator agrees with itself as long as it has posted at least one message."
+    	  ), document.querySelector('#img-four-validators')
+    	);
+    	</script>
+
+      <div class="content">
+        If we set our quorum size to be <span class="math">q = 2</span>, then the finality test in the previous example returns positive. <span class="math">A</span> and <span class="math">B</span> agree, and both acknowledge that they agree. For a quorum size of <span class="math">q = 3</span>, that is not the case and the finality test returns negative.
+      </div>
+
+      <div class="section-sub-title section-label">
+        Equivocation
+      </div>
+
+      <div class="content">
+        In the previous example, we assumed validators behaved well and none had equivocated, i.e., sent conflicting messages. Suppose a validator <span class="math">A</span> sends two messages estimating two different values 0 and 1, and neither references the other in its justification. Effectively, the validator has now two latest messages, since neither comes after the other, where order is obtained by saying <span class="math">m</span> arrived after <span class="math">m'</span> if the justification of <span class="math">m</span> contains <span class="math">m'</span>.
+      </div>
+
+      <div class="content">
+        Equivocation complicates finality seriously, since nodes who acknowledge one message from the malicious validator may be final on a value 
+      </div>
     </div>
 
     <script>
