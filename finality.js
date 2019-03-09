@@ -121,9 +121,10 @@ const levelKMessages = [{
   estimate: 0,
   justification: [0, 1, 2, 3, 4, 5],
   idx: 6
-}]
+}];
 
 const latestMessage = function(messages, validator) {
+  // Returns index of latest message from @validator in @messages
   // -1 if x is equivocating or no message
   // assumes a validator always includes its latest previous message in a new message
   // O(m)
@@ -138,6 +139,7 @@ const latestMessage = function(messages, validator) {
 }
 
 const laterMessages = function(messages, msgidx, validator) {
+  // Returns later messages from @validator after @msgidx in @messages
   return messages.filter(
     message => (
       message.sender == validator &&
@@ -147,6 +149,7 @@ const laterMessages = function(messages, msgidx, validator) {
 }
 
 function getEquivocatingMessages(messages) {
+  // Returns equivocating messages
   return messages.filter(
     m1 => messages.some(
       m2 => (
@@ -160,6 +163,9 @@ function getEquivocatingMessages(messages) {
 }
 
 const pruneMessages = function(messages, prunedValidators) {
+  // Removes messages from pruned validators
+  // Updates justification of remaining messages
+  // to not point to removed messages
   const prunedMessageIndices = messages.filter(
     m => prunedValidators.includes(m.sender)
   ).map(m => m.idx);
