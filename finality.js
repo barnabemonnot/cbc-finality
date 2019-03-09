@@ -1,3 +1,5 @@
+const _ = require("underscore");
+
 const introMessages = [{
   sender: 0,
   estimate: 1,
@@ -60,6 +62,43 @@ const fourValidatorsMessages = [{
   estimate: 1,
   justification: [2, 3, 7],
   idx: 8
+}];
+
+const levelKMessages = [{
+  sender: 0,
+  estimate: 0,
+  justification: [],
+  idx: 0
+}, {
+  sender: 1,
+  estimate: 0,
+  justification: [],
+  idx: 1
+}, {
+  sender: 0,
+  estimate: 0,
+  justification: [0, 1],
+  idx: 2
+}, {
+  sender: 1,
+  estimate: 0,
+  justification: [1],
+  idx: 3
+}, {
+  sender: 0,
+  estimate: 0,
+  justification: [0, 1, 2, 3],
+  idx: 4
+}, {
+  sender: 1,
+  estimate: 0,
+  justification: [0, 1, 2, 3],
+  idx: 5
+}, {
+  sender: 0,
+  estimate: 0,
+  justification: [0, 1, 2, 3, 4, 5],
+  idx: 6
 }]
 
 const latestMessage = function(messages, validator) {
@@ -175,25 +214,96 @@ function edges(messages) {
 function levelZero(messages, consensus) {
   return messages.map(
     message => {
-      return {
-        sender: message.sender,
-        estimate: message.estimate,
-        justification: message.justification,
+      return _.extend(message, {
         level0: laterMessages(messages, message.idx, message.sender).every(
           laterMessage => laterMessage.estimate == consensus
         )
-      };
+      });
     }
   )
 }
 
-function levelk(messages, consensus, k) {
-  // return messages.
+function levelk(messages, consensus, k, q) {
+  if (k == 0) return levelZero(messages, consensus);
+  else {
+    return levelk(messages, consensus, k-1, q).map(
+      m => {
+        const kLevelMessages = m.justification.map(
+          msgidx => messages.find(m3 => m3.idx == msgidx)
+        ).filter(
+          m2 => m2["level"+(k-1)]
+        );
+        const newMessage = m;
+        newMessage["level"+k] = kLevelMessages.length >= 2;
+        return newMessage;
+      }
+    );
+  }
 }
 
-const validators = [0, 1, 2, 3];
-console.log(edges(fourValidatorsMessages));
-const lobbyingGraph = outputLobbyingGraph(fourValidatorsMessages, validators, 1);
-console.log(lobbyingGraph);
-const s = pruneLobbyingGraph(lobbyingGraph, validators, 2);
-console.log(s);
+const pruneLevelK = function(messages, validators, consensus, k, q) {
+  console.log(messages);
+  var prunedValidators = [];
+  var prunedMessageIndices = [];
+  var morePruning = true;
+  while (morePruning) {
+    console.log("doing more pruning");
+    morePruning = false;
+
+    // Remove messages from pruned validators, including the reference to these
+    // messages in the justification of other messages
+    const prunedMessages = messages.filter(
+      m => !prunedValidators.includes(m.sender)
+    ).map(
+      m => {
+        return {
+          sender: m.sender,
+          estimate: m.estimate,
+          justification: _.difference(m.justification, prunedMessageIndices),
+          idx: m.idx
+        };
+      }
+    );
+
+    // If no one left, we are done, the witness does not exist
+    if (prunedMessages.length == 0) {
+      return [];
+    }
+
+    // Compute the k-level property for remaining messages
+    const kPrunedMessages = levelk(
+      prunedMessages, consensus, k, q
+    );
+    for (var i = 0; i < validators.length; i++) { // O(n)
+      const v = validators[i];
+
+      // If a validator does not have a level k message, we prune it
+      if (!prunedValidators.includes(v) && !kPrunedMessages.find(
+        m => m.sender == v && m["level"+k]
+      )) {
+        morePruning = true;
+        console.log("pruning", v);
+        prunedValidators.push(v);
+        prunedMessageIndices = prunedMessageIndices.concat(
+          messages.filter(m => m.sender == v).map(m => m.idx)
+        );
+        break;
+      }
+    }
+  }
+  return validators.filter(v => !prunedValidators.includes(v));
+}
+
+// const validators = [0, 1, 2, 3];
+// console.log(edges(fourValidatorsMessages));
+// const lobbyingGraph = outputLobbyingGraph(fourValidatorsMessages, validators, 1);
+// console.log(lobbyingGraph);
+// const s = pruneLobbyingGraph(lobbyingGraph, validators, 2);
+// console.log(s);
+//
+console.log("//////");
+console.log(pruneLevelK(levelKMessages, [0, 1], 0, 2, 2));
+console.log("//////");
+console.log(pruneLevelK(levelKMessages.concat(
+  [{ sender: 1, estimate: 0, justification: [0, 1, 2, 3, 4, 5], idx: 7 }]
+), [0, 1], 0, 2, 2));

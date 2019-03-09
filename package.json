@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/barnabemonnot/cbc-finality/issues"
   },
-  "homepage": "https://github.com/barnabemonnot/cbc-finality#readme"
+  "homepage": "https://github.com/barnabemonnot/cbc-finality#readme",
+  "dependencies": {
+    "underscore": "^1.9.1"
+  }
 }
