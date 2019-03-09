@@ -4,6 +4,8 @@ function sketch() {
     let svg = d3.select("#svg");
     let width = "400px";
     let height = "6100px";
+    let vdelay = 400;
+    let vduration = 400;
 
     svg.attr("width", width)
 	.attr("height", height);
@@ -34,27 +36,6 @@ function sketch() {
 	    .append('g')
 	    .attr("class", "message");
 
-	messagesEnter.append('circle')
-	    .attr("fill", circleColor)
-	    .attr("cx", (d) => marginLeft + (d.sender * validatorSpacing))
-	    .attr("cy", (d) => marginTop + (d.idx * messageSpacing))
-	    .attr("r", 12)
-	    .attr("opacity", 0)
-	    .transition(t)
-	    .delay((d) => d.idx * 200)
-	    .duration(200)
-	    .attr("opacity", 1);
-
-	messagesEnter.append('text')
-	    .attr("x", function(d,i) {return marginLeft + d.sender * validatorSpacing})
-	    .attr("y", function(d,i) { return marginTop + d.idx * messageSpacing})
-	    .attr("dy", ".3em")
-	    .attr("text-anchor", "middle")
-	    .attr("stroke", "white")
-	    .attr("fill", "white")
-	    .attr("stroke-width", "1px")
-	    .text((d) => d.estimate);
-
 	let lines = messagesEnter.selectAll('line')
 	    .data((d)=> d.justification)
 
@@ -67,18 +48,51 @@ function sketch() {
 	    .attr("x2", function(d) {
 		//wrong and temporary -- correct this
 		let parentData = d3.select(this.parentNode).datum();
-		return marginLeft + parentData.sender * validatorSpacing + 10;
+		let sender = data.find(function (datum) {
+		    return datum.idx === d });
+		//console.log(sender);
+		return marginLeft + sender.sender * validatorSpacing;
 	    })
 	    .attr("y1", function(d) {
 		let parentData = d3.select(this.parentNode).datum();
-		return marginTop + parentData.idx * messageSpacing
+		return marginTop + parentData.idx * messageSpacing;
 	    })
 	    .attr("y2", function(d) {
-		//wrong and temporary -- correct this
 		let parentData = d3.select(this.parentNode).datum();
-		return marginTop + parentData.idx * messageSpacing + 10;
+		let sender = data.find(function (datum) {
+		    return datum.idx === d });
+		return marginTop + sender.idx * messageSpacing;
 	    })
 	    .attr("stroke", "black")
+	    .attr("opacity", 0)
+	    .transition(t)
+	    .delay(function(d) {
+		let parentData = d3.select(this.parentNode).datum();
+		return parentData.idx  * vdelay
+	    })
+	    .duration(vduration)
+	    .attr("opacity", 1);
+
+	messagesEnter.append('circle')
+	    .attr("fill", circleColor)
+	    .attr("cx", (d) => marginLeft + (d.sender * validatorSpacing))
+	    .attr("cy", (d) => marginTop + (d.idx * messageSpacing))
+	    .attr("r", 12)
+	    .attr("opacity", 0)
+	    .transition(t)
+	    .delay((d) => d.idx * vdelay)
+	    .duration(vduration)
+	    .attr("opacity", 1);
+
+	messagesEnter.append('text')
+	    .attr("x", function(d,i) {return marginLeft + d.sender * validatorSpacing})
+	    .attr("y", function(d,i) { return marginTop + d.idx * messageSpacing})
+	    .attr("dy", ".3em")
+	    .attr("text-anchor", "middle")
+	    .attr("stroke", "white")
+	    .attr("fill", "white")
+	    .attr("stroke-width", "1px")
+	    .text((d) => d.estimate);
 
     })
 }
