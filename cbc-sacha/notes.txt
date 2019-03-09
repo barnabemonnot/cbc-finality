@@ -30,10 +30,6 @@ Specifically, we've implementing a finality oracle -- a set of heuristics that a
 
 
 
-
-
-
-
 *Here is my solution?*
 
 

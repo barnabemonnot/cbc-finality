@@ -9,6 +9,32 @@
   </head>
   <body>
     <div>
+      <div class="introduction">
+	<div>
+	  <h2>Here is the problem</h2>
+	  In blockchains we care about adding some notion of “finality” - the idea that some block can be so firmly established in the chain that it cannot be overtaken by a competing block unless a very large portion (eg. 1/4) of validators commit a uniquely attributable fault - act in some way which is clearly and cryptographically verifiably malicious.
+	</div>
+
+	<div>
+	  <h2>Here's why it's interesting</h2>
+	  Finality is a very significant advancement: once a block is finalized, it is secure regardless of network latency (unlike confirmations in PoW), and reverting the block requires >= x% of validators to cheat in a way that's detectable and can be used to destroy their deposits.
+	  <p>
+	    There are many different approaches to finality, but the two important ones within the ethereum ecosystem are Casper FFG and Casper CBC. Here we'll be focusing on CBC
+	  </p>
+	</div>
+
+	<div>
+	  <h2>What exactly are we focusing on?</h2>
+	  Specifically, we'll be implementing a finality oracle -- a set of heuristics that allow us to detect some of the cases where a block is final under CBC Casper.
+	  <p>
+	    But before we do that, let's take a look at why finality is not trivial to detect.
+	  </p>
+	  
+	</div>
+	
+	
+      </div>
+
       <div class="scroll-container">
 	<div id="graph">
 	  <svg id="intro-svg" viewBox="0 0 400 300"></svg>
