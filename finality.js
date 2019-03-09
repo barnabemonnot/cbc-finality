@@ -17,6 +17,28 @@ const introMessages = [{
   idx: 2
 }];
 
+const equivocatingMessages = [{
+  sender: 0,
+  estimate: 1,
+  justification: [],
+  idx: 0
+}, {
+  sender: 1,
+  estimate: 1,
+  justification: [],
+  idx: 1
+}, {
+  sender: 2,
+  estimate: 0,
+  justification: [0, 1],
+  idx: 2
+}, {
+  sender: 2,
+  estimate: 1,
+  justification: [0, 1],
+  idx: 3
+}];
+
 const fourValidatorsMessages = [{
   sender: 0,
   estimate: 1,
@@ -108,7 +130,7 @@ const latestMessage = function(messages, validator) {
   var highestMessage = -1;
   for (var i = 0; i < messages.length; i++) {
     if (messages[i].sender == validator &&
-      (highestMessage = -1 || message[i].justification.includes(highestMessage))) {
+      (highestMessage == -1 || message[i].justification.includes(highestMessage))) {
       highestMessage = i;
     }
   }
@@ -122,6 +144,43 @@ const laterMessages = function(messages, msgidx, validator) {
       message.justification.includes(msgidx)
     )
   );
+}
+
+function getEquivocatingMessages(messages) {
+  return messages.filter(
+    m1 => messages.some(
+      m2 => (
+        m1.sender == m2.sender &&
+        m1.estimate != m2.estimate &&
+        !m1.justification.includes(m2.idx) &&
+        !m2.justification.includes(m1.idx)
+      )
+    )
+  );
+}
+
+const pruneMessages = function(messages, prunedValidators) {
+  const prunedMessageIndices = messages.filter(
+    m => prunedValidators.includes(m.sender)
+  ).map(m => m.idx);
+  return messages.filter(
+    m => !prunedValidators.includes(m.sender)
+  ).map(
+    m => {
+      return {
+        sender: m.sender,
+        estimate: m.estimate,
+        justification: _.difference(m.justification, prunedMessageIndices),
+        idx: m.idx
+      };
+    }
+  );
+}
+
+const removeEquivocatingValidators = function(messages) {
+  const equivocatingMsgs = getEquivocatingMessages(messages);
+  const equivocatingValidators = _.uniq(equivocatingMsgs.map(m => m.sender));
+  return pruneMessages(messages, equivocatingValidators);
 }
 
 const outputLobbyingGraph = function(messages, validators, consensus) {
@@ -300,10 +359,11 @@ const pruneLevelK = function(messages, validators, consensus, k, q) {
 // console.log(lobbyingGraph);
 // const s = pruneLobbyingGraph(lobbyingGraph, validators, 2);
 // console.log(s);
-//
+
 console.log("//////");
 console.log(pruneLevelK(levelKMessages, [0, 1], 0, 2, 2));
 console.log("//////");
 console.log(pruneLevelK(levelKMessages.concat(
   [{ sender: 1, estimate: 0, justification: [0, 1, 2, 3, 4, 5], idx: 7 }]
 ), [0, 1], 0, 2, 2));
+console.log(removeEquivocatingValidators(equivocatingMessages));
