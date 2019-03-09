@@ -1,6 +1,6 @@
 <html>
   <head>
-    <meta charset="utf-8">    
+    <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" type="text/css" href="index.css"/>
     <script src="libs/d3v4+jetpack.js"></script>
@@ -13,7 +13,7 @@
 	<div id="graph">
 	  <svg id="intro-svg" viewBox="0 0 400 300"></svg>
 	</div>
-	
+
 	<div id="scroll-sections">
 
 	  <div class="epoch">
@@ -40,11 +40,27 @@
 
 	  <div class="epoch">
 	  </div>
-	  
+
 	</div>
-      </div>      
+      </div>
     </div>
-    
-    
+
+    <script>
+    let authorData = [{
+      name: "Aditya Asgaonkar",
+      affiliation: "Ethereum Foundation"
+    }, {
+        name: "Barnabé Monnot",
+        affiliation: "hackingresear.ch"
+      }, {
+        name: "Sacha Yves Saint-Léger",
+        affiliation: "hackingresear.ch"
+      }]
+      </script>
+      <script src="../src/authorFormatting.js"></script>
+      <script src="../src/sectionFormatting.js"></script>
+      <script src="../src/referencesFormatting.js"></script>
+      <script src="../src/figureFormatting.js"></script>
+      <script src="../src/mathFormatting.js"></script>
   </body>
 </html>
