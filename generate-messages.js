@@ -117,9 +117,22 @@ for (var round=0; round<num_total_messages; round++) {
   else {
     message_producer = randomInteger(num_validators);
   }
-  new_msg = constructMessage(all_messages, message_producer, latestMessages(all_messages).filter(msg_id => msg_id!=-1));
+  var justification = latestMessages(all_messages).filter(msg_id => msg_id!=-1);
+  for (var j=0; j<justification.length; j++) {
+    var go_back = randomInteger(3);
+    for (var p=0; p<go_back; p++) {
+      if (justification[j]!=-1) {
+        justification[j] = previousMessage(all_messages, justification[j]);
+      }
+      else {
+        break;
+      }
+    }
+  }
+  justification = justification.filter(msg_id => msg_id!=-1);
+  new_msg = constructMessage(all_messages, message_producer, justification);
   all_messages.push(new_msg);
 }
 var json = JSON.stringify(all_messages);
-fs.writeFileSync('data/12val220msg.json', json, 'utf8');
+fs.writeFileSync('data/12val220msg-lesser-sync.json', json, 'utf8');
 console.log(all_messages);
