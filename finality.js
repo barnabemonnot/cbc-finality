@@ -445,10 +445,10 @@ function tagLevel(taggedMessages, kbound) {
 // console.log("//////");
 // console.log(pruneLevelK(threeValidatorsK, [0, 1, 2], 0, 2, 2));
 
-const filename = 'data/4val100msg.json';
+const filename = 'data/12val220msg-lesser-sync.json';
 fs.readFile(filename, 'utf8', (err, data) => {
   const messages = JSON.parse(data);
-  const taggedMessages = levelk(messages, 0, messages.length, 4);
+  const taggedMessages = levelk(messages, 1, messages.length, 4);
   console.log(taggedMessages);
   const reTaggedMessages = tagLevel(taggedMessages, messages.length);
   fs.writeFileSync(filename, JSON.stringify(reTaggedMessages), 'utf8');
