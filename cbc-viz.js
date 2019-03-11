@@ -1,11 +1,9 @@
 function sketch() {
-    console.log("sketching cbc");
-
-    let svg = d3.select("#svg");
-    let width = "400px";
-    let height = "6100px";
-    let vdelay = 200;
-    let vduration = 200;
+  let svg = d3.select("#message-visual");
+  let width = "400px";
+  let height = "6100px";
+  let vdelay = 200;
+  let vduration = 200;
 
     svg.attr("width", width)
 	.attr("height", height);
@@ -23,7 +21,7 @@ function sketch() {
 	console.log(data);
 
 	let t = d3.transition().duration(250);
-	
+
 	// DATA JOIN
 	// Join new data with old elements, if any.
 	let messages = g.selectAll("g.message")
