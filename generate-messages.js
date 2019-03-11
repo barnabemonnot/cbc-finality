@@ -1,29 +1,12 @@
 const fs = require("fs");
-const _ = require("underscore");
+const cbc = require("./cbc")
 
-const num_validators = 12;
-const num_normal_messages = 150;
-const num_active_messages = 70;
-
-const active_validator_set = [3, 4, 5, 6, 7, 8, 9];
+const num_validators = 5;
+const num_messages = 100;
 
 function randomInteger(range) {
   // Returns random integer in [0,range)
   return Math.floor(Math.random() * range);
-}
-
-const latestMessage = function(messages, validator) {
-  // -1 if x is equivocating or no message
-  // assumes a validator always includes its latest previous message in a new message
-  // O(m)
-  var highestMessage = -1;
-  for (var i = 0; i < messages.length; i++) {
-    if (messages[i].sender == validator &&
-      (highestMessage == -1 || message[i].justification.includes(highestMessage))) {
-      highestMessage = i;
-    }
-  }
-  return highestMessage;
 }
 
 const latestMessages = function(messages) {
@@ -101,38 +84,12 @@ const constructMessage = function(messages, m_sender, m_justification) {
   };
 }
 
-// m = all_messages[4];
-// console.log(retrieveMessages(all_messages, m.justification));
-// console.log(m.justification);
-// console.log(getEstimate(all_messages, m.justification));
-
 all_messages = [];
-var num_total_messages = num_normal_messages+num_active_messages;
-var num_active_messages_produced = 0;
-for (var round=0; round<num_total_messages; round++) {
-  if(num_active_messages_produced<num_active_messages && randomInteger(num_total_messages)>num_active_messages) {
-    message_producer = _.sample(active_validator_set);
-    num_active_messages_produced++;
-  }
-  else {
-    message_producer = randomInteger(num_validators);
-  }
-  var justification = latestMessages(all_messages).filter(msg_id => msg_id!=-1);
-  for (var j=0; j<justification.length; j++) {
-    var go_back = randomInteger(3);
-    for (var p=0; p<go_back; p++) {
-      if (justification[j]!=-1) {
-        justification[j] = previousMessage(all_messages, justification[j]);
-      }
-      else {
-        break;
-      }
-    }
-  }
-  justification = justification.filter(msg_id => msg_id!=-1);
-  new_msg = constructMessage(all_messages, message_producer, justification);
+for (var round=0; round < num_messages; round++) {
+  message_producer = randomInteger(num_validators);
+  new_msg = constructMessage(all_messages, message_producer, latestMessages(all_messages).filter(msg_id => msg_id!=-1));
   all_messages.push(new_msg);
 }
 var json = JSON.stringify(all_messages);
-fs.writeFileSync('data/12val220msg-lesser-sync.json', json, 'utf8');
+fs.writeFileSync('data/4val100msg.json', json, 'utf8');
 console.log(all_messages);

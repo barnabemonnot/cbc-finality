@@ -1,5 +1,5 @@
 {
-  "name": "cbc-finality",
+  "name": "cbc-inspector",
   "version": "1.0.0",
   "description": "",
   "main": "finality.js",
@@ -8,14 +8,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/barnabemonnot/cbc-finality.git"
+    "url": "git+https://github.com/barnabemonnot/cbc-inspector.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/barnabemonnot/cbc-finality/issues"
+    "url": "https://github.com/barnabemonnot/cbc-inspector/issues"
   },
-  "homepage": "https://github.com/barnabemonnot/cbc-finality#readme",
+  "homepage": "https://github.com/barnabemonnot/cbc-inspector#readme",
   "dependencies": {
     "underscore": "^1.9.1"
   }

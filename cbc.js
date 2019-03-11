@@ -1,175 +1,4 @@
 const _ = require("underscore");
-const fs = require("fs");
-
-const introMessages = [{
-  sender: 0,
-  estimate: 1,
-  justification: [],
-  idx: 0
-}, {
-  sender: 1,
-  estimate: 1,
-  justification: [],
-  idx: 1
-}, {
-  sender: 0,
-  estimate: 0,
-  justification: [0, 1],
-  idx: 2
-}];
-
-const equivocatingMessages = [{
-  sender: 0,
-  estimate: 1,
-  justification: [],
-  idx: 0
-}, {
-  sender: 1,
-  estimate: 1,
-  justification: [],
-  idx: 1
-}, {
-  sender: 2,
-  estimate: 0,
-  justification: [0, 1],
-  idx: 2
-}, {
-  sender: 2,
-  estimate: 1,
-  justification: [0, 1],
-  idx: 3
-}];
-
-const fourValidatorsMessages = [{
-  sender: 0,
-  estimate: 1,
-  justification: [],
-  idx: 0
-}, {
-  sender: 1,
-  estimate: 1,
-  justification: [],
-  idx: 1
-}, {
-  sender: 2,
-  estimate: 1,
-  justification: [],
-  idx: 2
-}, {
-  sender: 3,
-  estimate: 1,
-  justification: [],
-  idx: 3
-}, {
-  sender: 0,
-  estimate: 1,
-  justification: [0, 1, 2],
-  idx: 4
-}, {
-  sender: 1,
-  estimate: 1,
-  justification: [0, 1],
-  idx: 5
-}, {
-  sender: 2,
-  estimate: 1,
-  justification: [2],
-  idx: 6
-}, {
-  sender: 3,
-  estimate: 1,
-  justification: [2, 3],
-  idx: 7
-}, {
-  sender: 3,
-  estimate: 1,
-  justification: [2, 3, 7],
-  idx: 8
-}];
-
-const levelKMessages = [{
-  sender: 0,
-  estimate: 0,
-  justification: [],
-  idx: 0
-}, {
-  sender: 1,
-  estimate: 0,
-  justification: [],
-  idx: 1
-}, {
-  sender: 0,
-  estimate: 0,
-  justification: [0, 1],
-  idx: 2
-}, {
-  sender: 1,
-  estimate: 0,
-  justification: [1],
-  idx: 3
-}, {
-  sender: 0,
-  estimate: 0,
-  justification: [0, 1, 2, 3],
-  idx: 4
-}, {
-  sender: 1,
-  estimate: 0,
-  justification: [0, 1, 2, 3],
-  idx: 5
-}, {
-  sender: 0,
-  estimate: 0,
-  justification: [0, 1, 2, 3, 4, 5],
-  idx: 6
-}];
-
-const threeValidatorsK = [{
-  sender: 0,
-  estimate: 0,
-  justification: [],
-  idx: 0
-}, {
-  sender: 0,
-  estimate: 0,
-  justification: [0],
-  idx: 1
-}, {
-  sender: 0,
-  estimate: 0,
-  justification: [0, 1, 3, 4, 6],
-  idx: 2
-}, {
-  sender: 1,
-  estimate: 0,
-  justification: [],
-  idx: 3
-}, {
-  sender: 1,
-  estimate: 0,
-  justification: [3, 6],
-  idx: 4
-}, {
-  sender: 1,
-  estimate: 0,
-  justification: [0, 1, 3, 4, 6],
-  idx: 5
-}, {
-  sender: 2,
-  estimate: 0,
-  justification: [],
-  idx: 6
-}, {
-  sender: 2,
-  estimate: 0,
-  justification: [3, 6],
-  idx: 7
-}, {
-  sender: 2,
-  estimate: 0,
-  justification: [3, 6, 7],
-  idx: 8
-}];
 
 const latestMessage = function(messages, validator) {
   // Returns index of latest message from @validator in @messages
@@ -179,12 +8,12 @@ const latestMessage = function(messages, validator) {
   var highestMessage = -1;
   for (var i = 0; i < messages.length; i++) {
     if (messages[i].sender == validator &&
-      (highestMessage == -1 || message[i].justification.includes(highestMessage))) {
+      (highestMessage == -1 || messages[i].justification.includes(highestMessage))) {
       highestMessage = i;
     }
   }
   return highestMessage;
-}
+};
 
 const laterMessages = function(messages, msgidx, validator) {
   // Returns later messages from @validator after @msgidx in @messages
@@ -194,9 +23,9 @@ const laterMessages = function(messages, msgidx, validator) {
       message.justification.includes(msgidx)
     )
   );
-}
+};
 
-function getEquivocatingMessages(messages) {
+const getEquivocatingMessages = function(messages) {
   // Returns equivocating messages
   return messages.filter(
     m1 => messages.some(
@@ -208,7 +37,7 @@ function getEquivocatingMessages(messages) {
       )
     )
   );
-}
+};
 
 const pruneMessages = function(messages, prunedValidators) {
   // Removes messages from pruned validators
@@ -229,17 +58,17 @@ const pruneMessages = function(messages, prunedValidators) {
       };
     }
   );
-}
+};
 
 const removeEquivocatingValidators = function(messages) {
   // Remove equivocating messages and prune validators who equivocated
   const equivocatingMsgs = getEquivocatingMessages(messages);
   const equivocatingValidators = _.uniq(equivocatingMsgs.map(m => m.sender));
   return pruneMessages(messages, equivocatingValidators);
-}
+};
 
-const outputLobbyingGraph = function(messages, validators, consensus) {
-  // Lobbying graph for simple detector
+const outputAcknowledgementGraph = function(messages, validators, consensus) {
+  // Graph for simple detector
   const latestMessages = validators.map(v => latestMessage(messages, v)); // O(nm)
   const pairs = validators.reduce(
     (acc, x) => acc.concat(validators.map(
@@ -263,9 +92,9 @@ const outputLobbyingGraph = function(messages, validators, consensus) {
       )
     )
   ); // O(n^2 . m^2)
-}
+};
 
-const pruneLobbyingGraph = function(lobbyingGraph, validators, q) {
+const pruneAcknowledgementGraph = function(ackGraph, validators, q) {
   // O(n^2)
   var pruned = [];
   var morePruning = true;
@@ -275,7 +104,7 @@ const pruneLobbyingGraph = function(lobbyingGraph, validators, q) {
     for (var i = 0; i < validators.length; i++) { // O(n)
       const v = validators[i];
       if (!pruned.includes(v)) {
-        const outDegree = lobbyingGraph.filter(
+        const outDegree = ackGraph.filter(
           edge => edge[0] == v && !pruned.includes(edge[1])
         ).length;
         if (outDegree < q) {
@@ -287,79 +116,51 @@ const pruneLobbyingGraph = function(lobbyingGraph, validators, q) {
     }
   }
   return validators.filter(v => !pruned.includes(v));
-}
+};
 
-function isFutureOf(m1, m2, messages) {
-  if (m1.justification.includes(m2.idx)) return true;
-  else return m1.justification.some(
-    m3idx => isFutureOf(messages[m3idx], m2, messages)
-  );
-}
-
-function connectToMessages(message, messages) {
-  return messages.filter(
-    m1 => (
-      message.justification.includes(m1.idx) &&
-      !messages.some(
-        m2 => isFutureOf(m2, m1, messages) && message.justification.includes(m2.idx)
+const levelZero = function(messages, consensus) {
+  // O(m^2)
+  return messages.map( // O(m)
+    m => {
+      const n = {
+        sender: m.sender,
+        estimate: m.estimate,
+        justification: m.justification.slice(),
+        idx: m.idx
+      }
+      n.level0 = laterMessages(messages, m.idx, m.sender).every(
+        laterMessage => laterMessage.estimate == consensus
       )
-    )
-  );
-}
-
-function edges(messages) {
-  return messages.reduce(
-    (acc, m1) => {
-      const searchArray = connectToMessages(m1, messages);
-      return acc.concat(
-        searchArray.map(
-          m2 => {
-            return {
-              source: m1.idx,
-              target: m2.idx
-            };
-          }
-        )
-      );
-    },
-    []
-  );
-}
-
-function levelZero(messages, consensus) {
-  return messages.map(
-    message => {
-      return _.extend(message, {
-        level0: laterMessages(messages, message.idx, message.sender).every(
-          laterMessage => laterMessage.estimate == consensus
-        )
-      });
+      return n;
     }
   )
-}
+};
 
-function levelk(messages, consensus, k, q) {
+const levelk = function(messages, consensus, k, q) {
+  // For each message, determine if the message is at level k on consensus for q
+  // O(km + m^2)
   if (k == 0) return levelZero(messages, consensus);
   else {
-    return levelk(messages, consensus, k-1, q).map(
+    const taggedMessages = levelk(messages, consensus, k-1, q);
+    return taggedMessages.map(
       m => {
         const kLevelMessages = m.justification.map(
-          msgidx => messages.find(m3 => m3.idx == msgidx)
+          msgidx => taggedMessages.find(m3 => m3.idx == msgidx)
         ).filter(
           m2 => m2["level"+(k-1)]
         );
         const newMessage = m;
-        newMessage["level"+k] = kLevelMessages.length >= 2;
+        newMessage["level"+k] = kLevelMessages.length >= q;
         return newMessage;
       }
     );
   }
-}
+};
 
 const pruneLevelK = function(messages, validators, consensus, k, q) {
   // We do the pruning by iterating over validators and pruning until either all
   // left satisfy the k-level property or none are left
-  console.log(messages);
+  // console.log(messages);
   var prunedValidators = [];
   var prunedMessageIndices = [];
   var morePruning = true;
@@ -389,7 +190,7 @@ const pruneLevelK = function(messages, validators, consensus, k, q) {
 
     // Compute the k-level property for remaining messages
     const kPrunedMessages = levelk(prunedMessages, consensus, k, q);
-    console.log("kPruned", kPrunedMessages);
+    // console.log("kPruned", kPrunedMessages);
     for (var i = 0; i < validators.length; i++) { // O(n)
       const v = validators[i];
 
@@ -408,9 +209,10 @@ const pruneLevelK = function(messages, validators, consensus, k, q) {
     }
   }
   return validators.filter(v => !prunedValidators.includes(v));
-}
+};
 
-function tagLevel(taggedMessages, kbound) {
+const tagLevel = function(taggedMessages, kbound) {
+  // From the messages with "level<k>" properties, obtain a single klevel attribute
   return taggedMessages.map(
     m => {
       var klevel = -1;
@@ -426,30 +228,11 @@ function tagLevel(taggedMessages, kbound) {
       }
     }
   )
+};
+
+module.exports = {
+  latestMessage, laterMessages, getEquivocatingMessages, pruneMessages,
+  removeEquivocatingValidators, outputAcknowledgementGraph,
+  pruneAcknowledgementGraph, levelZero, levelk, pruneLevelK,
+  tagLevel
 }
-
-// const validators = [0, 1, 2, 3];
-// console.log(edges(fourValidatorsMessages));
-// const lobbyingGraph = outputLobbyingGraph(fourValidatorsMessages, validators, 1);
-// console.log(lobbyingGraph);
-// const s = pruneLobbyingGraph(lobbyingGraph, validators, 2);
-// console.log(s);
-
-// console.log("//////");
-// console.log(pruneLevelK(levelKMessages, [0, 1], 0, 2, 2));
-// console.log("//////");
-// console.log(pruneLevelK(levelKMessages.concat(
-//   [{ sender: 1, estimate: 0, justification: [0, 1, 2, 3, 4, 5], idx: 7 }]
-// ), [0, 1], 0, 2, 2));
-// console.log(removeEquivocatingValidators(equivocatingMessages));
-// console.log("//////");
-// console.log(pruneLevelK(threeValidatorsK, [0, 1, 2], 0, 2, 2));
-
-const filename = 'data/12val220msg-lesser-sync.json';
-fs.readFile(filename, 'utf8', (err, data) => {
-  const messages = JSON.parse(data);
-  const taggedMessages = levelk(messages, 0, messages.length, 12);
-  console.log(taggedMessages);
-  const reTaggedMessages = tagLevel(taggedMessages, messages.length);
-  fs.writeFileSync(filename, JSON.stringify(reTaggedMessages), 'utf8');
-});
