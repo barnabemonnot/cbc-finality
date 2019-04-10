@@ -1,19 +1,46 @@
 const _ = require("underscore");
 
-const latestMessage = function(messages, validator) {
+const getLatestMessageIdx = function(validator, messages) {
   // Returns index of latest message from @validator in @messages
   // -1 if x is equivocating or no message
   // assumes a validator always includes its latest previous message in a new message
   // O(m)
   var highestMessage = -1;
   for (var i = 0; i < messages.length; i++) {
-    if (messages[i].sender == validator &&
-      (highestMessage == -1 || messages[i].justification.includes(highestMessage))) {
+    if (
+      messages[i].sender == validator &&
+      (highestMessage == -1 || messages[i].justification.includes(highestMessage))
+    ) {
       highestMessage = i;
     }
   }
   return highestMessage;
 };
+
+const getLatestMessages = function(validators, messages) {
+  // returns array of latest messages
+  // null if x is equivocating or no message
+  // assumes a validator always includes its latest previous message in a new message
+  // O(m)
+  var latestMessages = new Array(validators).fill(null);
+  for (var i = 0; i < messages.length; i++) {
+    if (
+      !latestMessages[messages[i].sender] || messages[i].justification.includes(latestMessages[messages[i].sender].idx)
+    ) {
+      latestMessages[messages[i].sender] = messages[i];
+    }
+  }
+  return latestMessages.filter(m => m);
+}
+
+const getLatestMessagesInJustification = function(validators, justification, messages) {
+  return getLatestMessages(
+    validators,
+    justification.map(
+      midx => messages.find(m => m.idx == midx)
+    )
+  );
+}
 
 const laterMessages = function(messages, msgidx, validator) {
   // Returns later messages from @validator after @msgidx in @messages
@@ -69,7 +96,7 @@ const removeEquivocatingValidators = function(messages) {
 
 const outputAcknowledgementGraph = function(messages, validators, consensus) {
   // Graph for simple detector
-  const latestMessages = validators.map(v => latestMessage(messages, v)); // O(nm)
+  const latestMessages = validators.map(v => getLatestMessageIdx(messages, v)); // O(nm)
   const pairs = validators.reduce(
     (acc, x) => acc.concat(validators.map(
       y => [x, y]
@@ -99,7 +126,6 @@ const pruneAcknowledgementGraph = function(ackGraph, validators, q) {
   var pruned = [];
   var morePruning = true;
   while (morePruning) { // O(n)
-    console.log("doing more pruning");
     morePruning = false;
     for (var i = 0; i < validators.length; i++) { // O(n)
       const v = validators[i];
@@ -109,7 +135,6 @@ const pruneAcknowledgementGraph = function(ackGraph, validators, q) {
         ).length;
         if (outDegree < q) {
           morePruning = true;
-          console.log("pruning", v);
           pruned.push(v);
         }
       }
@@ -128,25 +153,28 @@ const levelZero = function(messages, consensus) {
         justification: m.justification.slice(),
         idx: m.idx
       }
-      n.level0 = laterMessages(messages, m.idx, m.sender).every(
-        laterMessage => laterMessage.estimate == consensus
-      )
+      n.level0 = (
+        (n.estimate == consensus) &&
+        laterMessages(messages, m.idx, m.sender).every(
+          laterMessage => laterMessage.estimate == consensus
+        )
+      );
       return n;
     }
   )
 };
 
-const levelk = function(messages, consensus, k, q) {
+const levelk = function(validators, messages, consensus, k, q) {
   // For each message, determine if the message is at level k on consensus for q
   // O(km + m^2)
   if (k == 0) return levelZero(messages, consensus);
   else {
-    const taggedMessages = levelk(messages, consensus, k-1, q);
+    const taggedMessages = levelk(validators, messages, consensus, k-1, q);
     return taggedMessages.map(
       m => {
-        const kLevelMessages = m.justification.map(
+        const kLevelMessages = getLatestMessages(validators, m.justification.map(
           msgidx => taggedMessages.find(m3 => m3.idx == msgidx)
-        ).filter(
+        )).filter(
           m2 => m2["level"+(k-1)]
         );
         const newMessage = m;
@@ -165,7 +193,6 @@ const pruneLevelK = function(messages, validators, consensus, k, q) {
   var prunedMessageIndices = [];
   var morePruning = true;
   while (morePruning) {
-    console.log("doing more pruning");
     morePruning = false;
 
     // Remove messages from pruned validators, including the reference to these
@@ -190,7 +217,6 @@ const pruneLevelK = function(messages, validators, consensus, k, q) {
 
     // Compute the k-level property for remaining messages
     const kPrunedMessages = levelk(prunedMessages, consensus, k, q);
-    // console.log("kPruned", kPrunedMessages);
     for (var i = 0; i < validators.length; i++) { // O(n)
       const v = validators[i];
 
@@ -199,7 +225,6 @@ const pruneLevelK = function(messages, validators, consensus, k, q) {
         m => m.sender == v && m["level"+k]
       )) {
         morePruning = true;
-        console.log("pruning", v);
         prunedValidators.push(v);
         prunedMessageIndices = prunedMessageIndices.concat(
           messages.filter(m => m.sender == v).map(m => m.idx)
@@ -230,9 +255,132 @@ const tagLevel = function(taggedMessages, kbound) {
   )
 };
 
-module.exports = {
-  latestMessage, laterMessages, getEquivocatingMessages, pruneMessages,
+const isFutureOf = function(m1, m2, messages) {
+  if (m1.justification.includes(m2.idx)) return true;
+  else return m1.justification.some(
+    m3idx => isFutureOf(messages[m3idx], m2, messages)
+  );
+}
+
+const connectToMessages = function(message, messages) {
+  return messages.filter(
+    m1 => (
+      message.justification.includes(m1.idx) &&
+      !messages.some(
+        m2 => isFutureOf(m2, m1, messages) && message.justification.includes(m2.idx)
+      )
+    )
+  );
+}
+
+const getEdgesFromMessages = function(messages, allEdges) {
+  const equivocating = getEquivocatingMessages(messages).map(m => m.idx);
+  return messages.reduce(
+    (acc, m1) => {
+      const searchArray = allEdges ?
+      m1.justification.map(idx => { return { idx }; }) : connectToMessages(m1, messages);
+      return acc.concat(
+        searchArray.map(
+          m2 => {
+            return {
+              source: m1.idx,
+              target: m2.idx,
+              equivocating: equivocating.includes(m1.idx)
+            };
+          }
+        )
+      );
+    },
+    []
+  );
+}
+
+const treeFromMessage = function(message, messages) {
+  const justifiedMessages = message.justification.map(
+    midx => messages.find(m => m.idx == midx)
+  )
+  const trueParents = justifiedMessages.filter(
+    parent => justifiedMessages.every(
+      grandparent => !grandparent.justification.includes(parent.idx)
+    )
+  )
+  return trueParents.map(
+    m => {
+      return {
+        src: message.idx,
+        tgt: m.idx
+      }
+    }
+  ).concat(
+    trueParents.reduce(
+      (acc, m) => acc.concat(treeFromMessage(m, messages)),
+      []
+    )
+  );
+}
+
+const makeClique = function(cliqueSize) {
+  return d3.range(cliqueSize).map(
+    (d, i) => {
+      return {
+        sender: i,
+        justification: [],
+        estimate: 0,
+        idx: i
+      }
+    }
+  ).concat(
+    d3.range(cliqueSize).map(
+      (d, i) => {
+        return {
+          sender: i,
+          justification: d3.range(cliqueSize),
+          estimate: 0,
+          idx: cliqueSize + i
+        }
+      }
+    )
+  );
+}
+
+const removeValidator = function(validator, messages) {
+  const messageIndicesFromValidator = messages.filter(
+    m => m.sender == validator
+  ).map(
+    m => m.idx
+  );
+  return messages.filter(
+    m => m.sender != validator
+  ).map(
+    m => _.extend(m, {
+      justification: m.justification.filter(
+        midx => !messageIndicesFromValidator.includes(midx)
+      )
+    })
+  );
+}
+
+const keepMessagesFrom = function(midxFrom, messages) {
+  return messages.filter(
+    m => m.idx >= midxFrom
+  ).map(
+    m => _.extend(m, {
+      justification: m.justification.filter(
+        midx => midx >= midxFrom
+      )
+    })
+  );
+}
+
+const cbc = {
+  getLatestMessageIdx, getLatestMessages,
+  getLatestMessagesInJustification,
+  laterMessages,
+  getEquivocatingMessages, pruneMessages,
   removeEquivocatingValidators, outputAcknowledgementGraph,
   pruneAcknowledgementGraph, levelZero, levelk, pruneLevelK,
-  tagLevel
+  tagLevel, getEdgesFromMessages, isFutureOf, connectToMessages,
+  treeFromMessage, makeClique, removeValidator, keepMessagesFrom
 }
+
+module.exports = cbc;

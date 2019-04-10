@@ -1,20 +1,18 @@
 const fs = require("fs");
 const cbc = require("./cbc")
-
-const num_validators = 5;
-const num_messages = 100;
+const _ = require("underscore");
 
 function randomInteger(range) {
   // Returns random integer in [0,range)
   return Math.floor(Math.random() * range);
 }
 
-const latestMessages = function(messages) {
+const getLatestMessages = function(validators, messages) {
   // returns array of latest messages
   // -1 if x is equivocating or no message
   // assumes a validator always includes its latest previous message in a new message
   // O(m)
-  var highestMessage = new Array(num_validators).fill(-1);
+  var highestMessage = new Array(validators).fill(-1);
   for (var i = 0; i < messages.length; i++) {
     if (highestMessage[messages[i].sender] == -1 || messages[i].justification.includes(highestMessage[messages[i].sender])) {
       highestMessage[messages[i].sender] = i;
@@ -46,50 +44,81 @@ const retrieveMessages = function(messages, list_of_ids) {
   return retrieved_messages;
 }
 
-const getEstimate = function(messages, ids_of_justification) {
-  var wt_0 = 0, wt_1 = 0;
-  justification = ids_of_justification.map(
-    idx => messages[idx]
-  );
-  lastest_messages_in_justification = latestMessages(justification);
-  // console.log(lastest_messages_in_justification);
-
-  for (var i=0; i<lastest_messages_in_justification.length; i++) {
-    if (lastest_messages_in_justification[i]!=-1) {
-      if (messages[lastest_messages_in_justification[i]].estimate == 0) {
-        wt_0++;
-      }
-      else {
-        wt_1++;
-      }
-    }
+const getEstimate = function(validators, messages) {
+  // console.log("estimate messages", messages);
+  const estimateZero = messages.reduce(
+    (acc, m) => {
+      if (m.estimate == 0) return acc + 1;
+      else return acc;
+    }, 0
+  )
+  const estimateOne = messages.reduce(
+    (acc, m) => {
+      if (m.estimate == 1) return acc + 1;
+      else return acc;
+    }, 0
+  )
+  if (estimateZero > validators / 2) return 0;
+  else if (estimateOne > validators / 2) return 1;
+  else {
+    console.log("randomizing");
+    return randomInteger(2);
   }
-
-  if (wt_0 >= num_validators/2) {
-    return 0;
-  }
-  else if (wt_1 >= num_validators/2) {
-    return 1
-  }
-
-  return randomInteger(2);
 }
 
-const constructMessage = function(messages, m_sender, m_justification) {
+const constructMessage = function(messages, m_sender, m_justification, m_idx) {
   return {
     sender: m_sender,
     justification: m_justification,
     estimate: getEstimate(messages, m_justification),
-    idx: all_messages.length
+    idx: m_idx
   };
 }
 
-all_messages = [];
-for (var round=0; round < num_messages; round++) {
-  message_producer = randomInteger(num_validators);
-  new_msg = constructMessage(all_messages, message_producer, latestMessages(all_messages).filter(msg_id => msg_id!=-1));
-  all_messages.push(new_msg);
+function latestMessageOfSender(sender, messages) {
+  const messagesFromSender = messages.filter(
+    m => m.sender == sender
+  );
+  if (messagesFromSender.length == 0) return null;
+  else return messagesFromSender[messagesFromSender.length - 1];
 }
-var json = JSON.stringify(all_messages);
-fs.writeFileSync('data/4val100msg.json', json, 'utf8');
-console.log(all_messages);
+
+const roundMax = 39;
+const validators = 7;
+var messages = [];
+for (var round = 0; round < roundMax; round++) {
+  const sender = (2*round) % validators;
+  const latestMessage = latestMessageOfSender(sender, messages);
+  const latestJustification = latestMessage ? latestMessage.justification : [];
+  const latestIndex = latestMessage ? latestMessage.idx : -1;
+  const messagesSince = messages.filter(
+    m => m.idx > latestIndex
+  );
+  const messagesReceived = messagesSince.filter(
+    m => Math.random() < 0.15
+  );
+  const justification = _.uniq(
+    latestJustification.concat(
+      messagesReceived.map(m => m.idx)
+    )
+    .concat(
+      messagesReceived.reduce(
+        (acc, m) => _.uniq(acc.concat(m.justification)),
+        []
+      )
+    )
+    .concat(latestIndex == -1 ? [] : [latestIndex])
+  );
+  const latestMessages = cbc.getLatestMessagesInJustification(
+    validators,
+    justification,
+    messages
+  );
+  const estimate = getEstimate(validators, latestMessages);
+  messages.push({
+    idx: round,
+    estimate: estimate,
+    justification: justification,
+    sender: sender
+  });
+}
